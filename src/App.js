@@ -23,33 +23,37 @@ function App() {
 
   //FUNCTION TO UPLOAD AN IMAGE TO FIREBASE
   const handleUpload = () => {
-    const storageRef = ref(storage, `/files/${file.name}`)
-    const uploadTask = uploadBytesResumable(storageRef, file);
-    uploadTask.on(
-      "state_changed",
-      (snapshot) => {
-        const percent = Math.round(
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-        );
+    if (file) {
+      const storageRef = ref(storage, `/files/${file.name}`)
+      const uploadTask = uploadBytesResumable(storageRef, file);
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const percent = Math.round(
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+          );
 
-        setPercent(percent);
-      },
-      (err) => console.log(err),
-      () => {
-        // download url
-        getDownloadURL(uploadTask.snapshot.ref).then((url) => {
-          setFile("");
-          setPercent("");
-          addImage(url);
-        });
-      }
-    );
+          setPercent(percent);
+        },
+        (err) => console.log(err),
+        () => {
+          // download url
+          getDownloadURL(uploadTask.snapshot.ref).then((url) => {
+            setFile("");
+            setPercent("");
+            addImage(url);
+          });
+        }
+      );
+    } else {
+      alert("please select an image first")
+    }
   }
 
   //FUNCTION TO SAVE UPLOADED IMAGE DATA TO DATABASE
   const addImage = (url) => {
     //API call to add a new comment
-    fetch(config.baseurl+'image', {
+    fetch(config.baseurl + 'image', {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -71,7 +75,7 @@ function App() {
 
   //FUNCTION TO FETCH ALL IMAGES
   const fetchImages = () => {
-    fetch(config.baseurl+'image')
+    fetch(config.baseurl + 'image')
       .then(response => response.json())
       .then(json => {
         setImages(json);
@@ -81,20 +85,20 @@ function App() {
       });
   }
 
-  
+
 
   return (
     <div className="App">
       {/* UPLOAD PROGRESS */}
       {percentage !== "" && <Box bg='tomato' w='100%' p={4} color='white'>Uploading progress {percentage}</Box>}
-      
+
       {/* TOP NAVBAR */}
-      <AppBar 
+      <AppBar
         handleChange={handleChange}
         handleUpload={handleUpload}
       />
       {/* GALLERY LAYOUT */}
-      <Gallery 
+      <Gallery
         fetchImages={fetchImages}
         images={images}
       />
